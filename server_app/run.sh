@@ -1,0 +1,1 @@
+make clean && make && clear && echo "Server listening on 8080" && ./server

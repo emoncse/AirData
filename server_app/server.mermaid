@@ -1,0 +1,33 @@
+graph TD;
+    A[Start Server] -->|Initialize Logger| B[init_logger()]
+    B -->|Create Socket| C[create_socket()]
+    C -->|Bind Socket| D[bind_socket()]
+    D -->|Start Listening| E[start_listening()]
+    E -->|Accept Clients in Loop| F[accept_clients()]
+
+    subgraph Client Connection Handling
+        F -->|New Client Connected| G[handle_client()]
+        G -->|Receive Data| H[process_data()]
+        H -->|Extract User Info| I[parse_user_data()]
+        I -->|Sanitize User Input| J[sanitize_input()]
+        J -->|Store Data in MySQL| K[store_user_data()]
+        K -->|Execute SQL Query| L[execute_insert_query()]
+        L -->|Success?| M{Success?}
+        M -->|Yes| N[send_response("Data Stored Successfully")]
+        M -->|No| O[send_response("Failed to Store Data")]
+    end
+
+    subgraph Database Operations
+        K --> P[connect_to_database()]
+        P -->|Check Credentials| Q{Valid Connection?}
+        Q -->|Yes| L
+        Q -->|No| R[log_error("Database Connection Failed")]
+    end
+
+    subgraph Logging Module
+        B & G & H & K & R --> S[log_info()]
+        O & R --> T[log_error()]
+    end
+
+    N & O -->|Close Connection| U[Client Disconnected]
+    U -->|Wait for New Client| F
